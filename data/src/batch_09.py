@@ -282,8 +282,8 @@ QUESTIONS = [
         "History",
         "What was the Boer War fought over at the turn of the twentieth century?",
         [
-            "Control of territory in southern Africa, including areas rich in gold and diamonds",
-            "Control of the Suez Canal",
+            "Control of territory in southern Africa",
+            "Control of the Suez Canal in Egypt",
             "Trading rights in the Pacific",
             "The independence of Canada",
         ],

@@ -56,9 +56,9 @@ QUESTIONS = [
         "Government and Law",
         "What is a local council responsible for?",
         [
-            "Local services such as schools, housing, refuse collection, planning and social care",
+            "Schools, housing, refuse collection and social care",
             "Defence and the armed forces",
-            "Issuing passports",
+            "Issuing passports and visas",
             "Setting national income tax rates",
         ],
         "Local authorities provide a wide range of services in their areas, including education, "
@@ -92,9 +92,9 @@ QUESTIONS = [
         "Government and Law",
         "Who may vote in local elections in the UK?",
         [
-            "Residents aged 18 or over, including citizens of many other countries, depending on the nation",
-            "Only British citizens by birth",
-            "Only people who own their home",
+            "Registered residents aged 18 or over, subject to nationality rules",
+            "Only British citizens who were born here",
+            "Only people who own their own home",
             "Only people who pay council tax",
         ],
         "The franchise for local elections is broader than for United Kingdom general elections. "

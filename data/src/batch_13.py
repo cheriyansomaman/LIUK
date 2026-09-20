@@ -403,8 +403,8 @@ QUESTIONS = [
     ),
     (
         "Modern Society",
-        "Which of these sports was codified in Britain in the nineteenth century?",
-        ["Football, rugby, tennis, cricket and golf all had rules codified in Britain", "Basketball", "Baseball", "Judo"],
+        "Which of these sports had its modern rules codified in Britain?",
+        ["Association football", "Basketball", "Baseball", "Judo"],
         "A striking number of the world's major sports were given their modern rules in Britain "
         "during the nineteenth century, when schools, universities and new clubs sought common "
         "codes so that teams could compete against one another. The Football Association was "

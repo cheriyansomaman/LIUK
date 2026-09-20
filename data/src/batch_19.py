@@ -35,10 +35,10 @@ QUESTIONS = [
         "Government and Law",
         "Who hears cases in a magistrates' court in England and Wales?",
         [
-            "Usually a panel of three lay magistrates, or a district judge sitting alone",
-            "A jury of twelve people",
-            "A police inspector",
-            "A member of Parliament",
+            "Three lay magistrates or a district judge",
+            "A jury of twelve local people",
+            "A senior police inspector",
+            "An elected member of Parliament",
         ],
         "Most cases in a magistrates' court are heard by a bench of three lay magistrates, also "
         "called justices of the peace, who are unpaid volunteers from the local community without "
@@ -267,10 +267,10 @@ QUESTIONS = [
         "Government and Law",
         "What sentences can a criminal court impose?",
         [
-            "Fines, community orders, suspended sentences and imprisonment, depending on the offence",
-            "Only imprisonment",
-            "Only fines",
-            "Only compensation to the victim",
+            "Fines, community orders and imprisonment",
+            "Only imprisonment, whatever the offence",
+            "Only fines, with no other penalty",
+            "Only compensation paid to the victim",
         ],
         "Courts have a range of sentencing options. Fines are the most common penalty and are "
         "related to the seriousness of the offence and the offender's means. Community orders can "
@@ -285,9 +285,9 @@ QUESTIONS = [
         "Government and Law",
         "What is the maximum sentence for murder in the UK?",
         [
-            "Life imprisonment, with a minimum term set by the judge",
+            "Life imprisonment",
             "Ten years' imprisonment",
-            "A fine",
+            "An unlimited fine",
             "The death penalty",
         ],
         "Murder carries a mandatory sentence of life imprisonment. The judge sets a minimum term, "
@@ -420,10 +420,10 @@ QUESTIONS = [
         "Government and Law",
         "What is a hate crime?",
         [
-            "An offence aggravated by hostility based on race, religion, disability, sexual orientation or transgender identity",
-            "Any crime committed in anger",
+            "An offence aggravated by hostility towards the victim's identity",
+            "Any crime committed in a state of anger",
             "An offence committed against a public official",
-            "A crime carried out by a group of people",
+            "A crime carried out by an organised group",
         ],
         "A hate crime is a criminal offence in which the offender demonstrates hostility, or is "
         "motivated by hostility, towards the victim's actual or perceived race, religion, "
@@ -711,10 +711,10 @@ QUESTIONS = [
         "Government and Law",
         "What happens at a first hearing in a magistrates' court?",
         [
-            "The charge is put, a plea is taken and decisions are made about bail and where the case will be heard",
-            "The jury is sworn in",
+            "A plea is taken and bail and venue are decided",
+            "The jury is sworn in to hear the case",
             "Sentence is always passed immediately",
-            "The defendant must give evidence",
+            "The defendant must give evidence at once",
         ],
         "At a first hearing the charge is read to the defendant, who is asked to enter a plea of "
         "guilty or not guilty. The court decides whether the defendant should be remanded in custody "

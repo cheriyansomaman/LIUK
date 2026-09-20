@@ -453,21 +453,22 @@ QUESTIONS = [
     ),
     (
         "Government and Law",
-        "What is the purpose of the good character requirement in naturalisation?",
+        "Which of these would count against an applicant under the good character requirement?",
         [
-            "To ensure applicants have obeyed the law, paid their taxes and been honest with the authorities",
-            "To assess applicants' social status",
-            "To test applicants' knowledge of etiquette",
-            "To measure applicants' charitable donations",
+            "A record of tax evasion or deception in an application",
+            "Holding the citizenship of another country as well",
+            "Practising a minority religion while living in the UK",
+            "Having been out of work for a period while settled here",
         ],
-        "Applicants for British citizenship must show they are of good character, which the Home "
-        "Office assesses by looking at criminal convictions and cautions, involvement in serious or "
-        "organised crime, compliance with immigration law, financial soundness including payment of "
-        "tax and any bankruptcy or debts to public funds, and honesty in dealings with the "
+        "The good character test looks at conduct. The Home Office considers criminal convictions "
+        "and cautions, involvement in serious or organised crime, breaches of immigration law, "
+        "unpaid tax or debts to public funds, and above all honesty in dealings with the "
         "authorities. Deception at any stage, including cheating in the Life in the UK test, is "
-        "treated very seriously and can lead to refusal and to the later deprivation of citizenship. "
-        "The requirement expresses the principle that the rights of citizenship carry corresponding "
-        "responsibilities. Applicants must declare convictions from anywhere in the world, not only from Britain.",
+        "treated very seriously and can lead to refusal and even to citizenship being withdrawn "
+        "later. Convictions from anywhere in the world must be declared. What the test does not "
+        "examine is wealth, religion, employment record or other nationalities: dual citizenship "
+        "is expressly permitted and freedom of religion is protected, so none of those may count "
+        "against an applicant.",
     ),
     (
         "Government and Law",

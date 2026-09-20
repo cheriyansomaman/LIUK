@@ -286,7 +286,7 @@ QUESTIONS = [
         "Modern Society",
         "Which British invention allows people to withdraw cash from a machine in the street?",
         [
-            "The automated teller machine, developed in Britain in the 1960s",
+            "The automated teller machine",
             "The credit card",
             "The barcode",
             "The contactless payment card",

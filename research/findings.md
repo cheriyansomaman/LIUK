@@ -176,3 +176,48 @@ and Law:
 
 The two at the top are the strongest candidates: they are freshly verified, currently absent,
 and the Senedd's new system is among the most commonly mis-stated facts in UK civics.
+
+## Follow-up pass: questions that were wrong or unsound (20 September 2026)
+
+A second review fixed the items flagged above as doubtful, plus defects found by a
+structural scan of the bank that the build validator does not catch.
+
+**Factually wrong**
+
+- **q518** asked for "British scientists" who discovered the structure of DNA, but James
+  Watson is American. Reworded to "scientists working in Britain", and the explanation now
+  names Crick as English and Watson as an American working in Britain.
+- **q196** claimed 1066 was "the last successful invasion of England from abroad". Many
+  historians describe William of Orange's 1688 landing the same way. The question now asks
+  for the last occasion a foreign army conquered England **and replaced its ruling class**,
+  which selects 1066 unambiguously, and the explanation acknowledges 1688. The same absolute
+  claim in the Battle of Hastings explanation was softened to "last conquest of England by a
+  foreign army".
+
+**Duplicate**
+
+- **q27 and q985** were the same question about the good character requirement, differing
+  only by "for" versus "in" — close enough to escape the duplicate check, which normalises
+  punctuation but not wording. q985 was rewritten to ask which conduct counts *against* an
+  applicant, with the explanation rewritten to match.
+
+**Guessable without knowing the answer**
+
+A scan compared the length of each correct option against the mean of its three distractors.
+267 questions had a correct option more than 1.9 times longer, which lets a test-wise
+candidate pick the longest option. The worst was q631, where the correct answer was a full
+sentence and all three distractors were single words — a ratio of 10.2.
+
+Twelve of the worst were rebalanced (q631, q925, q926, q911, q951, q934, q520, q774, q863,
+q865, q151, q418), either by shortening the correct option and moving the detail into the
+explanation, or by lengthening the distractors. Nothing now exceeds a ratio of 3.0.
+
+**253 questions remain in the mild 1.9–2.5 band and were left alone.** That is a soft signal
+rather than a defect, and rewriting them all in bulk would risk introducing errors for
+little gain. Worth revisiting selectively if the bank is ever expanded.
+
+**Advisory**
+
+- The national parks explanation now gives Eryri and Bannau Brycheiniog alongside Snowdonia
+  and the Brecon Beacons, which have been their official names since 2022 and 2023. The
+  English names are kept because the handbook and the test still use them.

@@ -267,15 +267,16 @@ QUESTIONS = [
     ),
     (
         "History",
-        "Which British scientists helped discover the structure of DNA in 1953?",
+        "Which scientists working in Britain helped discover the structure of DNA in 1953?",
         [
-            "Francis Crick and James Watson, working with data from Rosalind Franklin",
+            "Francis Crick and James Watson",
             "Alexander Fleming and Howard Florey",
             "Charles Darwin and Alfred Wallace",
             "Michael Faraday and Humphry Davy",
         ],
-        "The double helix structure of DNA was described in 1953 at Cambridge by Francis Crick and "
-        "James Watson, drawing crucially on X-ray diffraction images produced by Rosalind Franklin "
+        "The double helix structure of DNA was described in 1953 at Cambridge by Francis Crick, an "
+        "Englishman, and James Watson, an American working in Britain, drawing crucially on X-ray "
+        "diffraction images produced by Rosalind Franklin "
         "and Maurice Wilkins at King's College London. The discovery explained how genetic "
         "information is stored and copied and became the foundation of modern molecular biology and "
         "genetics. Crick, Watson and Wilkins received the Nobel Prize; Franklin had died by then "
@@ -300,7 +301,7 @@ QUESTIONS = [
         "History",
         "Which British invention allowed patients to receive fertility treatment leading to the first IVF birth in 1978?",
         [
-            "In vitro fertilisation, developed by Robert Edwards and Patrick Steptoe",
+            "In vitro fertilisation",
             "The artificial heart valve",
             "The MRI scanner",
             "Keyhole surgery",

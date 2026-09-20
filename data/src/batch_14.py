@@ -620,7 +620,8 @@ QUESTIONS = [
         ],
         "There are fifteen national parks in the United Kingdom, ten in England, three in Wales and "
         "two in Scotland, including the Lake District, Snowdonia, the Peak District, the Cairngorms "
-        "and the Brecon Beacons. Northern Ireland has no national parks but does have designated "
+        "and the Brecon Beacons, the last two now officially named Eryri and Bannau Brycheiniog. "
+        "Northern Ireland has no national parks but does have designated "
         "areas of outstanding natural beauty. Unlike in some countries, British national parks "
         "contain farms, villages and businesses and much of the land is privately owned; the "
         "designation controls development and promotes conservation and public enjoyment rather "

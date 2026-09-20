@@ -35,7 +35,7 @@ QUESTIONS = [
     (
         "History",
         "Where is Skara Brae, one of the best-preserved prehistoric villages in Europe?",
-        ["Orkney, off the north coast of Scotland", "Cornwall", "County Antrim", "The Isle of Wight"],
+        ["Orkney", "Cornwall", "County Antrim", "The Isle of Wight"],
         "Skara Brae lies on the Orkney islands off the northern coast of Scotland and is a "
         "remarkably well-preserved neolithic village, uncovered when a storm stripped away the sand "
         "that had covered it for thousands of years. Its stone houses still contain built-in "
@@ -262,7 +262,7 @@ QUESTIONS = [
         "Norwegian invasion in the north before marching south to meet the Normans; he was killed "
         "in the battle. The conquest brought a new French-speaking ruling class, a programme of "
         "castle building and lasting changes to landholding, language and the church. It was the "
-        "last successful invasion of England from abroad, and the events are depicted in the Bayeux "
+        "last conquest of England by a foreign army, and the events are depicted in the Bayeux "
         "Tapestry.",
     ),
     (
@@ -713,7 +713,7 @@ QUESTIONS = [
     ),
     (
         "History",
-        "Which event is regarded as the last successful invasion of England from abroad?",
+        "Which event was the last occasion on which a foreign army conquered England and replaced its ruling class?",
         ["The Norman Conquest of 1066", "The Viking raid on Lindisfarne", "The Roman invasion of AD 43", "The Spanish Armada"],
         "The Norman Conquest of 1066 was the last occasion on which a foreign power successfully "
         "invaded England and seized the crown. William of Normandy's victory at Hastings led to a "
@@ -721,7 +721,9 @@ QUESTIONS = [
         "changes to language, law and landholding. The Roman invasion of AD 43 and the Viking "
         "settlements were earlier successful incursions, but they preceded 1066. The Spanish Armada "
         "of 1588 was defeated at sea and never landed an army. Later threats, from Napoleon and from "
-        "Nazi Germany, were likewise turned back before any invasion could be mounted.",
+        "Nazi Germany, were turned back before any invasion could be mounted. Historians sometimes "
+        "describe William of Orange's landing in 1688 as an invasion as well, but that displaced a "
+        "king rather than a ruling class.",
     ),
     (
         "History",
