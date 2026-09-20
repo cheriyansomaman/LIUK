@@ -5,13 +5,11 @@ on:
     branches: [claude/uk-life-exam-questions-azpue3]
   workflow_dispatch:
 
-# Allow the workflow to publish to Pages via OIDC.
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Let a running deploy finish rather than cancelling it mid-publish.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -25,21 +23,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Guard: the site is generated from data/src, so fail loudly if the
-      # committed CSV does not match its sources or fails validation.
+      # The site is generated from data/src, so fail loudly if the committed
+      # CSV does not match its sources or does not validate.
       - name: Verify question bank
         run: |
           python3 data/src/build.py
           git diff --exit-code -- data/questions.csv
 
-      # enablement: true turns Pages on for the repo if it is not already.
-      - uses: actions/configure-pages@v5
+      # Pages cannot be switched on from here: a repository's own Actions token
+      # is refused with "Resource not accessible by integration". So treat a
+      # failure as "Pages is not in GitHub Actions mode" and skip the deploy
+      # with an explanation, rather than failing the whole run.
+      - id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
         with:
           enablement: true
 
+      - name: Explain how to enable Pages
+        if: steps.pages.outcome == 'failure'
+        run: |
+          echo "::warning title=GitHub Pages is not enabled::The question bank validated, \
+          but there is nowhere to publish it yet. Enable Pages once under Settings -> Pages \
+          -> Build and deployment -> Source. Choosing 'GitHub Actions' makes this workflow \
+          publish on every push. Choosing 'Deploy from a branch' (root folder) serves the \
+          files directly, and this workflow will keep validating the bank without deploying."
+          echo "Skipping deploy: GitHub Pages is not set to the GitHub Actions source."
+
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
         with:
           path: .
 
       - id: deployment
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
