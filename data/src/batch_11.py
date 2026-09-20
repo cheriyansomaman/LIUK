@@ -721,7 +721,7 @@ QUESTIONS = [
             "It has become entirely rural",
         ],
         "The population of the United Kingdom has risen considerably since 1945, from around fifty "
-        "million to roughly sixty-seven million, through natural increase and migration. Arrivals "
+        "million to roughly sixty-nine million, through natural increase and migration. Arrivals "
         "from the Caribbean, India, Pakistan, Bangladesh and later from Africa, eastern Europe and "
         "elsewhere have made the country far more ethnically and religiously diverse, particularly "
         "in the larger cities. At the same time the population has aged markedly as life expectancy "

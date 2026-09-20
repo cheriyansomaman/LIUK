@@ -158,7 +158,7 @@ QUESTIONS = [
         "England contains roughly 84 per cent of the United Kingdom's population, with Scotland "
         "accounting for about 8 per cent, Wales about 5 per cent and Northern Ireland about 3 per "
         "cent. The total population of the United Kingdom has risen over recent decades and is now "
-        "in the region of 67 million. Growth has come from both natural increase and migration, and "
+        "in the region of 69 million. Growth has come from both natural increase and migration, and "
         "the population is ageing as life expectancy rises and birth rates fall. The distribution "
         "explains why English constituencies dominate the House of Commons and why devolution was "
         "introduced to give Scotland, Wales and Northern Ireland separate control over many "
@@ -433,8 +433,8 @@ QUESTIONS = [
     (
         "What is the UK",
         "What is the approximate population of the United Kingdom?",
-        ["About 67 million", "About 20 million", "About 120 million", "About 45 million"],
-        "The United Kingdom's population is in the region of 67 million people, having grown "
+        ["About 69 million", "About 20 million", "About 120 million", "About 45 million"],
+        "The United Kingdom's population is in the region of 69 million people, having grown "
         "steadily over recent decades through both natural increase and net migration. England "
         "accounts for roughly 84 per cent of that total, Scotland about 8 per cent, Wales about 5 "
         "per cent and Northern Ireland about 3 per cent. The population is ageing as life "

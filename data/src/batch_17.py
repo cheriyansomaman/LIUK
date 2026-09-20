@@ -46,8 +46,9 @@ QUESTIONS = [
         "less than half of the votes cast. The system tends to produce single-party majority "
         "governments and a strong link between a member and a particular area, but it can leave the "
         "national distribution of seats out of proportion to the votes cast. Other systems are used "
-        "elsewhere in the United Kingdom: the Scottish Parliament and the Senedd use an additional "
-        "member system, and Northern Ireland uses the single transferable vote.",
+        "elsewhere in the United Kingdom: the Scottish Parliament uses an additional member "
+        "system, the Senedd has been elected by a closed-list proportional system since 2026, "
+        "and Northern Ireland uses the single transferable vote.",
     ),
     (
         "Government and Law",
@@ -150,9 +151,10 @@ QUESTIONS = [
             "A committee of the Cabinet",
         ],
         "The House of Lords is the second chamber of the United Kingdom Parliament. Its members are "
-        "not elected: most are life peers appointed for their experience and expertise, a limited "
-        "number of hereditary peers remain following reform, and a group of Church of England "
-        "bishops sit as the Lords Spiritual. The Lords examine and revise bills sent from the "
+        "not elected: most are life peers appointed for their experience and expertise, and a "
+        "group of Church of England bishops sit as the Lords Spiritual. The remaining hereditary "
+        "peers lost the right to sit under an Act of 2026. The Lords examine and revise bills "
+        "sent from the "
         "Commons, scrutinise the work of government and conduct inquiries through committees. They "
         "can delay legislation and ask the Commons to think again, but under the Parliament Acts "
         "they cannot ultimately block a bill the elected house is determined to pass, particularly "
@@ -171,8 +173,9 @@ QUESTIONS = [
         "the Prime Minister, with some nominated by other party leaders and others recommended "
         "independently by the House of Lords Appointments Commission for their expertise in fields "
         "such as science, medicine, business, the armed forces or public service. A life peerage "
-        "cannot be inherited. A limited number of hereditary peers retained seats after reform in "
-        "1999, and twenty-six senior Church of England bishops sit as the Lords Spiritual. Members "
+        "cannot be inherited. A limited number of hereditary peers retained seats after the "
+        "reform of 1999 but lost them under an Act of 2026, and twenty-six senior Church of "
+        "England bishops sit as the Lords Spiritual. Members "
         "who belong to no party sit as crossbenchers, which is unusual among second chambers "
         "internationally.",
     ),

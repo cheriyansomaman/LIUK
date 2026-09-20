@@ -57,7 +57,8 @@ QUESTIONS = [
         ],
         "Because health is a devolved matter, arrangements differ across the United Kingdom. In "
         "England a fixed charge is made for each prescribed item, though many people are exempt, "
-        "including children, people over sixty, those on certain benefits, pregnant women and new "
+        "including children, people aged sixty or over, those on certain benefits, pregnant women "
+        "and new "
         "mothers, and people with particular medical conditions. Prescriptions are provided without "
         "charge in Scotland, Wales and Northern Ireland, where the devolved governments abolished "
         "the charge. Dental treatment and eye tests carry charges in most cases, again with "

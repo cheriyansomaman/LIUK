@@ -1,0 +1,58 @@
+[
+  {
+    "id": 811,
+    "field": "explanation",
+    "current": "the Scottish Parliament and the Senedd use an additional member system, and Northern Ireland uses the single transferable vote.",
+    "corrected": "the Scottish Parliament uses an additional member system, the Senedd has used a closed-list proportional system since the 2026 election, and Northern Ireland uses the single transferable vote.",
+    "reason": "The Senedd Cymru (Members and Elections) Act 2024 abolished the additional member system for Wales. From the election of 7 May 2026 the Senedd is elected by a closed proportional list system (D'Hondt) in 16 constituencies returning six members each. The claim is now false for Wales; it remains true for Scotland. Verified via search summaries of senedd.wales and the House of Commons Library (two independently worded searches); the pages themselves could not be fetched because egress is blocked.",
+    "source": "https://senedd.wales/how-we-work/about-members-of-the-senedd/how-are-members-of-the-senedd-elected/"
+  },
+  {
+    "id": 818,
+    "field": "explanation",
+    "current": "a limited number of hereditary peers remain following reform, and a group of Church of England bishops sit as the Lords Spiritual.",
+    "corrected": "the remaining hereditary peers lost the right to sit in 2026, and a group of Church of England bishops sit as the Lords Spiritual.",
+    "reason": "The House of Lords (Hereditary Peers) Act 2026 (c. 12) received Royal Assent on 18 March 2026 and removed the right of hereditary peers to sit and vote in the House of Lords when the 2024-26 session ended on 29 April 2026. The House now consists only of life peers and the Lords Spiritual, so the present-tense claim that hereditary peers remain is false. Corroborated by two independently worded searches surfacing the House of Lords Library, the House of Commons Library and legislation.gov.uk; pages not fetchable (egress blocked).",
+    "source": "https://www.legislation.gov.uk/ukpga/2026/12"
+  },
+  {
+    "id": 819,
+    "field": "explanation",
+    "current": "A limited number of hereditary peers retained seats after reform in 1999, and twenty-six senior Church of England bishops sit as the Lords Spiritual.",
+    "corrected": "A limited number of hereditary peers retained seats after reform in 1999 but lost them under the House of Lords (Hereditary Peers) Act 2026, and twenty-six senior Church of England bishops sit as the Lords Spiritual.",
+    "reason": "Same as id 818: hereditary peers ceased to be members on 29 April 2026. As written the sentence implies they still hold those seats. The designated correct answer ('They are appointed as life peers') is unaffected and is now more strongly correct than before.",
+    "source": "https://www.legislation.gov.uk/ukpga/2026/12"
+  },
+  {
+    "id": 131,
+    "field": "option_c",
+    "current": "About 67 million",
+    "corrected": "About 69 million",
+    "reason": "The ONS provisional estimate of the UK population on 30 June 2025 is 69.5 million. 'About 67 million' is roughly 2.5 million too low and is no longer the best statement of the figure. The answer key is unaffected: option C remains correct, and the distractors (120m, 45m, 20m) stay clearly wrong. Verified via a search summary of the ONS mid-2025 bulletin; page not fetchable (egress blocked).",
+    "source": "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/provisionalpopulationestimatefortheuk/mid2025"
+  },
+  {
+    "id": 131,
+    "field": "explanation",
+    "current": "The United Kingdom's population is in the region of 67 million people",
+    "corrected": "The United Kingdom's population is in the region of 69.5 million people",
+    "reason": "ONS provisional estimate for 30 June 2025 is 69.5 million (69,487,000). Must be changed together with option_c so the explanation and the option agree.",
+    "source": "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/provisionalpopulationestimatefortheuk/mid2025"
+  },
+  {
+    "id": 111,
+    "field": "explanation",
+    "current": "The total population of the United Kingdom has risen over recent decades and is now in the region of 67 million.",
+    "corrected": "The total population of the United Kingdom has risen over recent decades and is now in the region of 69.5 million.",
+    "reason": "ONS provisional estimate for 30 June 2025 is 69.5 million. The '84 per cent in England / 8 per cent Scotland / 5 per cent Wales / 3 per cent Northern Ireland' split in the same explanation was checked against the mid-2025 figures and remains correct, so only the total needs changing.",
+    "source": "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/provisionalpopulationestimatefortheuk/mid2025"
+  },
+  {
+    "id": 707,
+    "field": "explanation",
+    "current": "including children, people over sixty,",
+    "corrected": "including children, people aged sixty or over,",
+    "reason": "In England the NHS prescription charge exemption applies from the age of 60, i.e. to people aged 60 or over, not only to those over 60. A person on their sixtieth birthday is exempt. The government confirmed in 2022 that the upper age exemption stays at 60 and will not be aligned with State Pension age, so 60 (not 66) is still the right threshold in 2026. Verified via search summaries of gov.uk and NHSBSA.",
+    "source": "https://www.gov.uk/government/news/free-prescription-age-frozen-at-60"
+  }
+]
