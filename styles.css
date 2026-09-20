@@ -334,3 +334,152 @@ kbd {
   .card { padding: 18px 16px; }
   .question { font-size: 1.1rem; }
 }
+
+/* ---------- Home ---------- */
+
+#home, #review { display: grid; gap: 16px; }
+
+.card .badge + h2 { margin-top: 10px; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 14px 0 4px;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+.check input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.check input:disabled { cursor: default; }
+.check input:disabled + span { color: var(--muted); }
+
+.notice {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: .88rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: .74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tag.ok { background: var(--good-soft); color: var(--good); }
+.tag.no { background: var(--bad-soft); color: var(--bad); }
+
+.badge-ok { background: var(--good-soft); color: var(--good); }
+.badge-no { background: var(--bad-soft); color: var(--bad); }
+
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+#history-card .breakdown td:last-child,
+#history-card .breakdown th:last-child { text-align: right; }
+#history-card .breakdown td:nth-child(3),
+#history-card .breakdown th:nth-child(3) { text-align: left; }
+#history-card .ghost-btn { margin-top: 16px; }
+
+/* ---------- Quiz navigation ---------- */
+
+.nav-row { margin-top: 18px; }
+.nav-row .primary-btn { margin-top: 0; }
+
+.option.chosen {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.option.chosen .letter { background: var(--accent); color: #fff; }
+
+@media (prefers-color-scheme: dark) {
+  .option.chosen .letter { color: #0e1220; }
+}
+
+.dots-wrap { margin-top: 14px; }
+.dots-label { font-size: .8rem; margin: 0 0 8px; }
+
+.dots { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.dot {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--muted);
+  font: inherit;
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.dot:hover { border-color: var(--accent); color: var(--accent); }
+.dot.answered { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.dot.current { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dot:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.low-time { color: var(--bad); font-weight: 700; }
+
+/* ---------- Review ---------- */
+
+.review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+
+.review-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rnum { font-weight: 700; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.review-q { font-size: 1.05rem; line-height: 1.45; margin: 12px 0 16px; font-weight: 600; }
+
+.option.static { cursor: default; }
+.option.static:hover { border-color: var(--line); background: var(--card); }
+.option.static.correct:hover { border-color: var(--good); background: var(--good-soft); }
+.option.static.wrong:hover { border-color: var(--bad); background: var(--bad-soft); }
+
+.your-pick {
+  margin-left: auto;
+  padding-left: 10px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.review-item .explanation { margin-top: 16px; font-size: .95rem; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 480px) {
+  .dot { width: 30px; height: 30px; }
+  .your-pick { display: none; }
+}

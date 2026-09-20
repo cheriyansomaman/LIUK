@@ -1,19 +1,49 @@
-# Life in the UK — Practice Test
+# Life in the UK — Mock Tests & Practice
 
-A free practice-test app for the UK citizenship test. It serves **1,058 multiple-choice
-questions** in a random order, shows a 100–150 word explanation after every answer, and
-remembers where you got to — all in the browser, with no accounts and no server.
+A free practice app for the UK citizenship test, built around **1,058 original multiple-choice
+questions**. It runs mock tests in the shape of the real exam and keeps track of which questions
+you have already seen — all in the browser, with no accounts and no server.
 
-## How it works
+## Mock tests
 
-- Questions are shuffled once per session and served with **no repeats** until the whole
-  bank has been answered.
-- Your shuffled order, position, score and per-question results are saved in the browser's
-  `localStorage`, so closing the tab and coming back later resumes exactly where you left off.
-- Each answer immediately reveals the correct option and an explanation of why it is right.
-- A summary screen at the end gives your score, percentage and a breakdown by topic.
-- **Nothing is uploaded.** There is no backend, no database and no tracking; your progress
-  never leaves your device.
+Each mock test mirrors the real one:
+
+- **24 questions**, drawn from **all five topics** of the syllabus.
+- **45 minutes** on the clock (switch the timer off if you would rather not race it).
+- **Pass mark 18 out of 24**, the same 75% the Home Office uses.
+- **No explanations until you finish** — you answer, then review.
+
+Within a test you can move back and forth, change an answer, and jump straight to any question
+from the numbered grid underneath. Unanswered questions are marked so nothing is left behind by
+accident.
+
+### Every test is a fresh set of questions
+
+The app keeps a **pool of questions you have never been served**. Starting a test takes its 24
+questions out of that pool, so no question can appear in two mock tests. With 1,058 questions
+that is **44 full tests** before anything repeats. The home screen always shows how many unused
+questions are left and how many more tests they cover.
+
+Each test's questions, your answers and your score are stored, so finished tests can be reviewed
+any time from the history table — with the correct answer and a 100–150 word explanation for
+every question. Abandoning a test in progress puts its questions back in the pool; resetting the
+mock tests clears the history and makes the whole bank available again.
+
+Each question's four options are shuffled per test and that order is stored too, so coming back
+to a test — or reviewing an old one — shows exactly the layout you answered.
+
+## Practice mode
+
+Alongside the mock tests, practice mode runs the **whole bank** in a random order with the
+explanation shown straight after each answer. It has its own progress and score, and it does
+**not** consume the mock-test pool.
+
+## How your progress is kept
+
+Everything — the unused pool, finished tests, the test in progress and its clock, and practice
+progress — lives in the browser's `localStorage`. Closing the tab and coming back later resumes
+exactly where you left off, including mid-test. **Nothing is uploaded**: there is no backend, no
+database and no tracking.
 
 ## Running it locally
 
