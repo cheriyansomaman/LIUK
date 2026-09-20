@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life in the UK — Practice Test</title>
+<meta name="description" content="Free offline-friendly practice questions for the Life in the UK test. Your progress stays in your browser.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇬🇧</text></svg>">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">UK</span>
+      <div>
+        <h1>Life in the UK</h1>
+        <p class="sub">Practice test</p>
+      </div>
+    </div>
+    <button id="restart-btn" class="ghost-btn" type="button" hidden>Restart</button>
+  </header>
+
+  <div id="progress-area" hidden>
+    <div class="stats">
+      <span id="progress-text">Question 1 of 1</span>
+      <span id="score-text">Score 0 (0%)</span>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the question bank">
+      <div id="bar-fill" class="bar-fill"></div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Loading -->
+    <section id="loading" class="card centred">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading questions…</p>
+    </section>
+
+    <!-- Error -->
+    <section id="error" class="card" hidden>
+      <h2>Could not load the questions</h2>
+      <p id="error-detail" class="muted"></p>
+      <p class="muted">
+        If you opened this file directly from your computer, your browser blocks the data file for
+        security reasons. Serve the folder over HTTP instead:
+      </p>
+      <pre><code>python3 -m http.server 8000</code></pre>
+      <p class="muted">Then open <code>http://localhost:8000/</code>.</p>
+      <button id="retry-btn" class="primary-btn" type="button">Try again</button>
+    </section>
+
+    <!-- Resume conflict -->
+    <section id="conflict" class="card" hidden>
+      <h2>The question bank has changed</h2>
+      <p id="conflict-detail" class="muted"></p>
+      <div class="actions">
+        <button id="conflict-keep" class="primary-btn" type="button">Keep my progress</button>
+        <button id="conflict-fresh" class="ghost-btn" type="button">Start fresh</button>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section id="quiz" class="card" hidden>
+      <span id="category" class="badge"></span>
+      <h2 id="question" class="question"></h2>
+      <ul id="options" class="options"></ul>
+      <div id="feedback" class="feedback" hidden>
+        <p id="verdict" class="verdict"></p>
+        <p id="explanation" class="explanation"></p>
+      </div>
+      <button id="next-btn" class="primary-btn" type="button" hidden>Next question</button>
+      <p class="hint muted">Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer, <kbd>Enter</kbd> to continue.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="card" hidden>
+      <h2>Session complete</h2>
+      <p id="summary-score" class="big-score"></p>
+      <p id="summary-line" class="muted"></p>
+      <h3>By topic</h3>
+      <table class="breakdown">
+        <thead><tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Rate</th></tr></thead>
+        <tbody id="breakdown-body"></tbody>
+      </table>
+      <button id="summary-restart" class="primary-btn" type="button">Start a new session</button>
+    </section>
+  </main>
+
+  <footer class="foot muted">
+    <p>
+      Original practice questions covering the official Life in the UK test syllabus. Not affiliated
+      with the Home Office. Your progress is stored only in this browser — nothing is uploaded.
+    </p>
+  </footer>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
