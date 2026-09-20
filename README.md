@@ -28,15 +28,26 @@ Then open <http://localhost:8000/>.
 
 ## Publishing on GitHub Pages
 
-The site is plain static files with relative paths, so it deploys as-is:
+The site is plain static files with relative paths, so it deploys as-is. **Pages has to be
+switched on once by hand** — a repository's own Actions token is not allowed to create a
+Pages site, so this cannot be automated from inside the repo.
 
-1. Push this repository to GitHub.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-4. Pick the branch and the **`/ (root)`** folder, then **Save**.
+Go to **Settings → Pages → Build and deployment → Source** and pick one of:
 
-The site appears at `https://<user>.github.io/<repo>/` within a minute or two. The empty
-`.nojekyll` file stops GitHub from running Jekyll over the files.
+**GitHub Actions** (recommended). `.github/workflows/pages.yml` then publishes on every push
+to the default branch. The job regenerates `data/questions.csv` from `data/src/` and fails if
+the committed CSV differs or fails validation, so a stale or broken question bank cannot go
+live. After switching the source, re-run the workflow from the **Actions** tab.
+
+**Deploy from a branch.** Choose the branch and the **`/ (root)`** folder, then **Save**. This
+serves the files directly and needs no Actions run, but skips the validation guard above.
+
+Either way the site appears at `https://<user>.github.io/<repo>/` within a minute or two. The
+empty `.nojekyll` file stops GitHub running Jekyll over the files.
+
+Until Pages is enabled, the workflow fails at the `configure-pages` step with
+`Resource not accessible by integration`. That is the expected symptom, not a bug in the
+workflow.
 
 ## The question bank
 
