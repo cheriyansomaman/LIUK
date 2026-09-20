@@ -45,9 +45,10 @@ serves the files directly and needs no Actions run, but skips the validation gua
 Either way the site appears at `https://<user>.github.io/<repo>/` within a minute or two. The
 empty `.nojekyll` file stops GitHub running Jekyll over the files.
 
-Until Pages is enabled, the workflow fails at the `configure-pages` step with
-`Resource not accessible by integration`. That is the expected symptom, not a bug in the
-workflow.
+Until Pages is switched to the **GitHub Actions** source, the workflow still runs and still
+validates the question bank, but skips the deploy and leaves a warning saying so. It does not
+fail. This is deliberate, so that using the **Deploy from a branch** source does not leave a
+permanently red workflow.
 
 ## The question bank
 
