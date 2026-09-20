@@ -146,7 +146,7 @@ QUESTIONS = [
         "deductions and net pay. People who are self-employed, or who have other untaxed income, "
         "must instead complete a self-assessment tax return each year and pay what they owe by the "
         "deadline. Everyone has a personal allowance, an amount of income on which no income tax is "
-        "charged.",
+        "charged. Returns are usually filed online, and the system calculates the tax owed automatically.",
     ),
     (
         "Modern Society",
