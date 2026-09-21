@@ -1,14 +1,14 @@
-# Life in the UK — Mock Tests & Practice
+# Life in the UK — Mock Tests
 
-A free practice app for the UK citizenship test, built around **1,058 original multiple-choice
-questions**. It runs mock tests in the shape of the real exam and keeps track of which questions
-you have already seen — all in the browser, with no accounts and no server.
+A free practice app for the UK citizenship test: **45 mock tests of 24 questions**, built from a
+bank of **1,080 original questions**. It runs entirely in the browser, with no accounts and no
+server.
 
-## Mock tests
+## The tests
 
 Each mock test mirrors the real one:
 
-- **24 questions**, drawn from **all five topics** of the syllabus.
+- **24 questions**, covering **all five topics** of the syllabus.
 - **45 minutes** on the clock (switch the timer off if you would rather not race it).
 - **Pass mark 18 out of 24**, the same 75% the Home Office uses.
 - **No explanations until you finish** — you answer, then review.
@@ -17,33 +17,39 @@ Within a test you can move back and forth, change an answer, and jump straight t
 from the numbered grid underneath. Unanswered questions are marked so nothing is left behind by
 accident.
 
-### Every test is a fresh set of questions
+## Take them in any order
 
-The app keeps a **pool of questions you have never been served**. Starting a test takes its 24
-questions out of that pool, so no question can appear in two mock tests. With 1,058 questions
-that is **44 full tests** before anything repeats. The home screen always shows how many unused
-questions are left and how many more tests they cover.
+The home screen lists all 45 tests. Every one can be started at any time, and each keeps its own
+progress:
 
-Each test's questions, your answers and your score are stored, so finished tests can be reviewed
-any time from the history table — with the correct answer and a 100–150 word explanation for
-every question. Abandoning a test in progress puts its questions back in the pool; resetting the
-mock tests clears the history and makes the whole bank available again.
+- **not started** — shows how many questions it holds;
+- **in progress** — shows how many of the 24 are answered, and offers **Resume**;
+- **finished** — shows the score and whether it was a pass, and offers **Review**.
 
-Each question's four options are shuffled per test and that order is stored too, so coming back
-to a test — or reviewing an old one — shows exactly the layout you answered.
+**Reset** clears a test back to untouched, whether it is half done or finished, and **Take again**
+restarts a finished one straight away. **Reset all tests** clears the lot. Nothing you do to one
+test touches another.
 
-## Practice mode
+The clock only runs while a test is open, so leaving a test and coming back later does not eat
+the 45 minutes. Closing the tab in the middle of a test and reopening the app drops you back into
+that test.
 
-Alongside the mock tests, practice mode runs the **whole bank** in a random order with the
-explanation shown straight after each answer. It has its own progress and score, and it does
-**not** consume the mock-test pool.
+## Every test has its own questions
+
+The split is fixed in the data, not drawn at random: `data/questions.csv` carries a `test` column
+that assigns each of the 1,080 questions to exactly one of the 45 tests, so **no question appears
+in two tests**. The share-out is proportional to the size of each topic, and every test contains
+at least one question from each of the five, so test 12 always means the same 24 questions and a
+saved score keeps its meaning.
+
+Reviewing a finished test walks all 24 questions with the answer you chose, the correct answer and
+a 100–150 word explanation.
 
 ## How your progress is kept
 
-Everything — the unused pool, finished tests, the test in progress and its clock, and practice
-progress — lives in the browser's `localStorage`. Closing the tab and coming back later resumes
-exactly where you left off, including mid-test. **Nothing is uploaded**: there is no backend, no
-database and no tracking.
+Every test's answers, option order, score and remaining time live in the browser's
+`localStorage`. Closing the tab and coming back later resumes exactly where you left off,
+including mid-test. **Nothing is uploaded**: there is no backend, no database and no tracking.
 
 ## Running it locally
 
@@ -87,6 +93,7 @@ permanently red workflow.
 | column | meaning |
 | --- | --- |
 | `id` | sequential integer |
+| `test` | which of the 45 mock tests the question belongs to, 1–45 |
 | `category` | one of the five syllabus chapters |
 | `question` | the question text |
 | `option_a` … `option_d` | the four options |
@@ -95,13 +102,13 @@ permanently red workflow.
 
 Coverage follows the five chapters of the official syllabus:
 
-| category | questions |
-| --- | --- |
-| History | 402 |
-| Modern Society | 258 |
-| Government and Law | 250 |
-| Values and Principles | 80 |
-| What is the UK | 68 |
+| category | questions | per test |
+| --- | --- | --- |
+| History | 402 | 9 |
+| Modern Society | 264 | 6 |
+| Government and Law | 261 | 6 |
+| Values and Principles | 82 | 2 |
+| What is the UK | 71 | 1 |
 
 ### Regenerating the CSV
 
@@ -117,7 +124,13 @@ python3 data/src/build.py
 
 Validation checks the row shape, the answer letter distribution, that every explanation is
 100–150 words, that no two questions are duplicates and that options within a question are
-distinct. It exits non-zero if anything fails.
+distinct. It then deals the questions into the 45 tests — each category hands every test its
+proportional share, and the remainders are dealt round-robin — and checks that every test ends up
+with exactly 24 questions covering all five categories. It exits non-zero if anything fails.
+
+The deal is deterministic, so rebuilding from unchanged sources produces the same tests. Adding
+questions changes the make-up of the tests, and the app then discards saved progress for any test
+whose questions no longer match.
 
 Because options are shuffled, questions must not use answers like "all of the above".
 

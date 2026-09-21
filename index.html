@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Life in the UK — Mock Tests</title>
-<meta name="description" content="Free Life in the UK mock tests: 24 questions, 45 minutes, and a fresh set of questions every time. Your progress stays in your browser.">
+<meta name="description" content="45 Life in the UK mock tests of 24 questions each, timed like the real exam. Take them in any order; your progress stays in your browser.">
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇬🇧</text></svg>">
 </head>
@@ -16,10 +16,10 @@
       <span class="brand-mark" aria-hidden="true">UK</span>
       <div>
         <h1>Life in the UK</h1>
-        <p class="sub">Mock tests &amp; practice</p>
+        <p class="sub">Mock tests</p>
       </div>
     </div>
-    <button id="home-btn" class="ghost-btn" type="button" hidden>Home</button>
+    <button id="home-btn" class="ghost-btn" type="button" hidden>All tests</button>
   </header>
 
   <div id="progress-area" hidden>
@@ -52,86 +52,48 @@
       <button id="retry-btn" class="primary-btn" type="button">Try again</button>
     </section>
 
-    <!-- Home -->
+    <!-- Home: every mock test -->
     <section id="home" hidden>
-
       <div class="card">
-        <span class="badge">Mock test</span>
-        <h2 id="mock-title">Mock test 1</h2>
-        <p class="muted">
-          24 questions drawn from all five topics, 45 minutes, pass mark 18 out of 24 — the same
-          shape as the real test. No explanations until you finish.
-        </p>
-        <p id="pool-line" class="muted"></p>
+        <h2 id="home-title">Mock tests</h2>
+        <p class="muted" id="home-blurb"></p>
+        <p id="overall-line" class="muted"></p>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tests completed">
+          <div id="overall-fill" class="bar-fill"></div>
+        </div>
         <label class="check">
           <input type="checkbox" id="timed-toggle" checked>
-          <span>Timed — 45 minutes</span>
+          <span>Timed — 45 minutes per test (the clock pauses when you leave a test)</span>
         </label>
         <div class="actions">
-          <button id="start-mock" class="primary-btn" type="button">Start mock test</button>
-          <button id="abandon-mock" class="ghost-btn" type="button" hidden>Abandon test</button>
-        </div>
-        <p id="pool-empty" class="notice" hidden></p>
-      </div>
-
-      <div id="history-card" class="card" hidden>
-        <h2>Your mock tests</h2>
-        <p id="history-line" class="muted"></p>
-        <table class="breakdown">
-          <thead>
-            <tr>
-              <th scope="col">Test</th>
-              <th scope="col">Score</th>
-              <th scope="col">Result</th>
-              <th scope="col"><span class="sr-only">Review</span></th>
-            </tr>
-          </thead>
-          <tbody id="history-body"></tbody>
-        </table>
-        <button id="reset-mocks" class="ghost-btn" type="button">Reset mock tests</button>
-      </div>
-
-      <div class="card">
-        <span class="badge">Practice</span>
-        <h2>Practise the whole bank</h2>
-        <p class="muted">
-          Every question in the bank, one at a time in a random order, with the explanation
-          straight after each answer. Separate from your mock tests — it does not use them up.
-        </p>
-        <p id="practice-line" class="muted"></p>
-        <div class="actions">
-          <button id="start-practice" class="primary-btn" type="button">Start practice</button>
-          <button id="reset-practice" class="ghost-btn" type="button" hidden>Reset practice</button>
+          <button id="reset-all" class="ghost-btn" type="button" hidden>Reset all tests</button>
         </div>
       </div>
-
+      <ol id="test-list" class="test-list"></ol>
     </section>
 
-    <!-- Quiz (used by both modes) -->
+    <!-- A test in progress -->
     <section id="quiz" hidden>
       <div class="card">
         <span id="category" class="badge"></span>
         <h2 id="question" class="question"></h2>
         <ul id="options" class="options"></ul>
-        <div id="feedback" class="feedback" hidden>
-          <p id="verdict" class="verdict"></p>
-          <p id="explanation" class="explanation"></p>
-        </div>
         <div class="actions nav-row">
           <button id="prev-btn" class="ghost-btn" type="button" hidden>Back</button>
-          <button id="next-btn" class="primary-btn" type="button" hidden>Next question</button>
+          <button id="next-btn" class="primary-btn" type="button">Next question</button>
         </div>
         <p id="quiz-hint" class="hint muted">
-          Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer, <kbd>Enter</kbd> to continue.
+          Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer, <kbd>Enter</kbd> for the next question.
+          You can go back and change an answer before you finish.
         </p>
       </div>
-      <nav id="dots-wrap" class="dots-wrap" hidden aria-label="Jump to a question">
+      <nav id="dots-wrap" class="dots-wrap" aria-label="Jump to a question">
         <p class="muted dots-label">Jump to a question — filled squares are answered.</p>
         <div id="dots" class="dots"></div>
       </nav>
     </section>
 
-    <!-- Mock test result -->
+    <!-- Result -->
     <section id="result" class="card" hidden>
       <span id="result-badge" class="badge"></span>
       <h2 id="result-title">Mock test</h2>
@@ -144,12 +106,13 @@
       </table>
       <div class="actions">
         <button id="result-review" class="primary-btn" type="button">Review your answers</button>
-        <button id="result-next" class="ghost-btn" type="button">Next mock test</button>
-        <button id="result-home" class="ghost-btn" type="button">Home</button>
+        <button id="result-retake" class="ghost-btn" type="button">Take this test again</button>
+        <button id="result-next" class="ghost-btn" type="button">Next test</button>
+        <button id="result-home" class="ghost-btn" type="button">All tests</button>
       </div>
     </section>
 
-    <!-- Review of a finished mock test -->
+    <!-- Review -->
     <section id="review" hidden>
       <div class="card">
         <h2 id="review-title">Review</h2>
@@ -159,22 +122,6 @@
       <ol id="review-list" class="review-list"></ol>
       <div class="card centred">
         <button id="review-back-2" class="primary-btn" type="button">Back to results</button>
-      </div>
-    </section>
-
-    <!-- Practice summary -->
-    <section id="summary" class="card" hidden>
-      <h2>Practice complete</h2>
-      <p id="summary-score" class="big-score"></p>
-      <p id="summary-line" class="muted"></p>
-      <h3>By topic</h3>
-      <table class="breakdown">
-        <thead><tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Rate</th></tr></thead>
-        <tbody id="breakdown-body"></tbody>
-      </table>
-      <div class="actions">
-        <button id="summary-restart" class="primary-btn" type="button">Practise again</button>
-        <button id="summary-home" class="ghost-btn" type="button">Home</button>
       </div>
     </section>
   </main>

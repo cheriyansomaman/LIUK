@@ -1,4 +1,4 @@
-/* Life in the UK — mock tests and practice.
+/* Life in the UK — 45 fixed mock tests of 24 questions.
    Static, dependency-free, client-side only. Progress lives in localStorage. */
 
 (function () {
@@ -8,30 +8,29 @@
   var STORE_KEY = 'liuk-session-v1';
   var LETTERS = ['A', 'B', 'C', 'D'];
 
-  var TEST_SIZE = 24;            // questions in one mock test
-  var PASS_MARK = 18;            // 75% of 24, as in the real test
+  var PASS_RATE = 0.75;                     // the real test's pass mark
   var TIME_LIMIT_MS = 45 * 60 * 1000;
+  var SAVE_EVERY_TICKS = 5;
 
-  var bank = [];       // [{id, category, question, options:[4], answerIndex, explanation}]
-  var byId = {};       // id -> question
-  var state = null;    // see freshState()
-  var mode = null;     // 'mock' | 'practice' while the quiz screen is up
-  var current = null;  // practice mode: {q, display:[{text, isCorrect}]}
-  var awaitingNext = false;
-  var ticker = null;
+  var bank = [];        // [{id, test, category, question, options:[4], answerIndex, explanation}]
+  var byId = {};        // id -> question
+  var tests = [];       // [{n, ids:[id]}] in test order
+  var byTest = {};      // n -> {n, ids}
+
+  var state = null;     // {v:3, timed, tests:{n: attempt}}
+  var openTest = 0;     // the test on screen, 0 when none
+  var clock = null;
+  var clockAt = 0;
+  var ticks = 0;
 
   var el = {};
-  ['loading', 'error', 'error-detail', 'retry-btn', 'home', 'home-btn',
-   'mock-title', 'pool-line', 'pool-empty', 'timed-toggle', 'start-mock', 'abandon-mock',
-   'history-card', 'history-line', 'history-body', 'reset-mocks',
-   'practice-line', 'start-practice', 'reset-practice',
-   'quiz', 'category', 'question', 'options', 'feedback', 'verdict', 'explanation',
-   'prev-btn', 'next-btn', 'quiz-hint', 'dots-wrap', 'dots',
-   'result', 'result-badge', 'result-title', 'result-score', 'result-line',
-   'result-breakdown', 'result-review', 'result-next', 'result-home',
-   'review', 'review-title', 'review-line', 'review-list', 'review-back', 'review-back-2',
-   'summary', 'summary-score', 'summary-line', 'breakdown-body', 'summary-restart',
-   'summary-home', 'progress-area', 'progress-text', 'score-text', 'bar-fill'
+  ['loading', 'error', 'error-detail', 'retry-btn', 'home', 'home-btn', 'home-title',
+   'home-blurb', 'overall-line', 'overall-fill', 'timed-toggle', 'reset-all', 'test-list',
+   'quiz', 'category', 'question', 'options', 'prev-btn', 'next-btn', 'quiz-hint',
+   'dots-wrap', 'dots', 'result', 'result-badge', 'result-title', 'result-score',
+   'result-line', 'result-breakdown', 'result-review', 'result-retake', 'result-next',
+   'result-home', 'review', 'review-title', 'review-line', 'review-list', 'review-back',
+   'review-back-2', 'progress-area', 'progress-text', 'score-text', 'bar-fill'
   ].forEach(function (id) {
     el[id] = document.getElementById(id);
   });
@@ -66,7 +65,7 @@
     if (!rows.length) throw new Error('The question file is empty.');
 
     var header = rows[0].map(function (h) { return h.trim().toLowerCase(); });
-    var need = ['id', 'category', 'question', 'option_a', 'option_b', 'option_c',
+    var need = ['id', 'test', 'category', 'question', 'option_a', 'option_b', 'option_c',
                 'option_d', 'answer', 'explanation'];
     var idx = {};
     need.forEach(function (name) {
@@ -83,12 +82,14 @@
       var answer = (row[idx.answer] || '').trim().toUpperCase();
       var answerIndex = LETTERS.indexOf(answer);
       var id = (row[idx.id] || '').trim();
-      if (!id || answerIndex === -1) continue;                  // skip malformed row
+      var test = parseInt((row[idx.test] || '').trim(), 10);
+      if (!id || answerIndex === -1 || !(test > 0)) continue;   // skip malformed row
       if (seen[id]) continue;                                   // skip duplicate id
       seen[id] = true;
 
       out.push({
         id: id,
+        test: test,
         category: (row[idx.category] || 'General').trim(),
         question: (row[idx.question] || '').trim(),
         options: [row[idx.option_a], row[idx.option_b], row[idx.option_c], row[idx.option_d]]
@@ -102,6 +103,19 @@
     return out;
   }
 
+  function groupTests() {
+    byTest = {};
+    bank.forEach(function (q) {
+      var t = byTest[q.test] || (byTest[q.test] = { n: q.test, ids: [] });
+      t.ids.push(q.id);
+    });
+    tests = Object.keys(byTest)
+      .map(Number)
+      .sort(function (a, b) { return a - b; })
+      .map(function (n) { return byTest[n]; });
+    if (!tests.length) throw new Error('No mock tests were found in the question file.');
+  }
+
   /* -------------------------------------------------------------- helpers */
 
   function shuffle(arr) {
@@ -112,19 +126,13 @@
     return arr;
   }
 
-  function allIds() {
-    return bank.map(function (q) { return q.id; });
-  }
+  function pct(n, d) { return d ? Math.round((n / d) * 100) : 0; }
 
-  function pct(n, d) {
-    return d ? Math.round((n / d) * 100) : 0;
-  }
+  function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
 
-  function plural(n, word) {
-    return n + ' ' + word + (n === 1 ? '' : 's');
-  }
+  function passMark(size) { return Math.ceil(size * PASS_RATE); }
 
-  function clock(ms) {
+  function stamp(ms) {
     if (ms < 0) ms = 0;
     var total = Math.round(ms / 1000);
     var m = Math.floor(total / 60), s = total % 60;
@@ -133,28 +141,12 @@
 
   /* ---------------------------------------------------------------- state */
 
-  function freshMock() {
-    return { pool: shuffle(allIds()), tests: [], active: null };
-  }
-
-  function freshPractice() {
-    return { order: shuffle(allIds()), pos: 0, results: {} };
-  }
-
-  function freshState() {
-    return {
-      v: 2,
-      timed: true,
-      mock: freshMock(),
-      practice: freshPractice()
-    };
-  }
+  function freshState() { return { v: 3, timed: true, open: 0, tests: {} }; }
 
   function loadState() {
     try {
       var raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw) || null;
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;   // private mode, corrupt JSON, blocked storage
     }
@@ -164,148 +156,130 @@
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
     } catch (e) {
-      /* storage unavailable — the session still works, it just won't resume */
+      /* storage unavailable — the app still works, it just won't resume */
     }
   }
 
-  // Accept a saved session of any shape: upgrade v1 (one long practice run),
-  // drop ids the bank no longer has, and fold newly-added ids into the pool.
+  // Keep whatever still makes sense; drop anything the question file no
+  // longer backs. Sessions from before the fixed tests cannot be mapped on
+  // to them, so they are simply replaced.
   function adoptState(saved) {
     var s = freshState();
-    if (!saved || typeof saved !== 'object') return s;
-
+    if (!saved || saved.v !== 3 || !saved.tests || typeof saved.tests !== 'object') return s;
     if (typeof saved.timed === 'boolean') s.timed = saved.timed;
+    if (typeof saved.open === 'number') s.open = saved.open;
 
-    // v1 kept a single {order, pos, results} run — that becomes practice.
-    var practice = saved.v === 1 ? saved : saved.practice;
-    if (practice && Array.isArray(practice.order) && typeof practice.pos === 'number') {
-      var results = {};
-      if (practice.results && typeof practice.results === 'object') {
-        Object.keys(practice.results).forEach(function (id) {
-          if (byId[id]) results[id] = !!practice.results[id];
-        });
-      }
-      var answered = practice.order.slice(0, practice.pos).filter(function (id) { return !!byId[id]; });
-      var pending = practice.order.slice(practice.pos).filter(function (id) { return !!byId[id]; });
-      var known = {};
-      practice.order.forEach(function (id) { known[id] = true; });
-      var added = shuffle(allIds().filter(function (id) { return !known[id]; }));
-      s.practice = { order: answered.concat(pending, added), pos: answered.length, results: results };
-    }
+    Object.keys(saved.tests).forEach(function (key) {
+      var n = Number(key);
+      var a = saved.tests[key];
+      if (!byTest[n] || !a || !Array.isArray(a.qorder) || !a.order) return;
 
-    var m = saved.mock;
-    if (m && Array.isArray(m.pool) && Array.isArray(m.tests)) {
-      s.mock.tests = m.tests.filter(function (t) {
-        return t && Array.isArray(t.ids) && typeof t.n === 'number';
-      });
-      s.mock.active = validActive(m.active);
+      var want = byTest[n].ids.slice().sort();
+      var got = a.qorder.slice().sort();
+      if (want.length !== got.length) return;
+      for (var i = 0; i < want.length; i++) if (want[i] !== got[i]) return;   // test changed
 
-      // Anything not already used by a finished or in-flight test stays available.
-      var used = {};
-      s.mock.tests.forEach(function (t) {
-        t.ids.forEach(function (id) { used[id] = true; });
-      });
-      if (s.mock.active) s.mock.active.ids.forEach(function (id) { used[id] = true; });
-      s.mock.pool = shuffle(allIds().filter(function (id) { return !used[id]; }));
-    }
+      if (!a.answers || typeof a.answers !== 'object') a.answers = {};
+      if (typeof a.pos !== 'number' || a.pos < 0 || a.pos >= a.qorder.length) a.pos = 0;
+      if (typeof a.used !== 'number' || a.used < 0) a.used = 0;
+      s.tests[n] = a;
+    });
 
+    if (!s.tests[s.open] || s.tests[s.open].done) s.open = 0;
     return s;
   }
 
-  function validActive(a) {
-    if (!a || !Array.isArray(a.ids) || !a.ids.length) return null;
-    if (!a.ids.every(function (id) { return !!byId[id]; })) return null;   // bank changed under it
-    if (!a.order || typeof a.order !== 'object') return null;
-    if (!a.answers || typeof a.answers !== 'object') a.answers = {};
-    if (typeof a.pos !== 'number' || a.pos < 0 || a.pos >= a.ids.length) a.pos = 0;
-    return a;
-  }
+  function attempt(n) { return state.tests[n] || null; }
 
-  /* ------------------------------------------------- picking a mock test */
-
-  // Sainte-Lague highest averages: every topic that still has questions gets at
-  // least one, then the rest go in proportion to what is left in the pool. On
-  // the full bank that is History 9, Modern Society 6, Government and Law 6,
-  // Values and Principles 2, What is the UK 1.
-  function allocate(avail, want) {
-    var cats = Object.keys(avail).filter(function (c) { return avail[c] > 0; });
-    cats.sort(function (a, b) { return avail[b] - avail[a] || (a < b ? -1 : 1); });
-
-    var quota = {}, used = 0, total = 0;
-    cats.forEach(function (c) { quota[c] = 0; total += avail[c]; });
-    if (want > total) want = total;
-
-    for (var i = 0; i < cats.length && used < want; i++) { quota[cats[i]] = 1; used++; }
-
-    while (used < want) {
-      var best = null, bestScore = -1;
-      for (var j = 0; j < cats.length; j++) {
-        var c = cats[j];
-        if (quota[c] >= avail[c]) continue;
-        var s = avail[c] / (2 * quota[c] + 1);
-        if (s > bestScore) { bestScore = s; best = c; }
-      }
-      if (!best) break;
-      quota[best]++; used++;
-    }
-    return quota;
-  }
-
-  // Draws TEST_SIZE ids out of the unused pool, spread across the topics.
-  // The ids come out of the pool, so no later test can serve them again.
-  function drawTest() {
-    var pool = state.mock.pool;
-    var byCat = {};
-    pool.forEach(function (id) {
-      var c = byId[id].category;
-      (byCat[c] || (byCat[c] = [])).push(id);
-    });
-
-    var avail = {};
-    Object.keys(byCat).forEach(function (c) { avail[c] = byCat[c].length; });
-    var quota = allocate(avail, TEST_SIZE);
-
-    var picked = [];
-    Object.keys(quota).forEach(function (c) {
-      var ids = shuffle(byCat[c].slice());
-      picked = picked.concat(ids.slice(0, quota[c]));
-    });
-    shuffle(picked);
-
-    var taken = {};
-    picked.forEach(function (id) { taken[id] = true; });
-    state.mock.pool = pool.filter(function (id) { return !taken[id]; });
-
+  function startAttempt(n) {
+    var ids = shuffle(byTest[n].ids.slice());
     var order = {};
-    picked.forEach(function (id) {
-      order[id] = shuffle([0, 1, 2, 3]);
-    });
-
-    return {
-      n: state.mock.tests.length + 1,
-      ids: picked,
-      order: order,     // id -> display slot k shows original option order[id][k]
-      answers: {},      // id -> original option index chosen
+    ids.forEach(function (id) { order[id] = shuffle([0, 1, 2, 3]); });
+    state.tests[n] = {
+      qorder: ids,
+      order: order,           // id -> display slot k shows original option order[id][k]
+      answers: {},            // id -> original option index chosen
       pos: 0,
+      used: 0,                // milliseconds of the allowance spent
       timed: !!state.timed,
-      startedAt: Date.now(),
-      endsAt: state.timed ? Date.now() + TIME_LIMIT_MS : 0
+      done: false,
+      startedAt: Date.now()
     };
+    saveState();
+    return state.tests[n];
   }
 
-  function testsLeft() {
-    return Math.floor(state.mock.pool.length / TEST_SIZE);
+  function answered(a) { return Object.keys(a.answers).length; }
+
+  function scoreOf(a) {
+    var n = 0;
+    a.qorder.forEach(function (id) {
+      if (byId[id] && a.answers[id] === byId[id].answerIndex) n++;
+    });
+    return n;
   }
+
+  function passed(a) { return a.done && a.score >= passMark(a.qorder.length); }
+
+  function nextUnfinished(after) {
+    for (var i = 0; i < tests.length; i++) {
+      var n = tests[(i + after) % tests.length].n;
+      var a = attempt(n);
+      if (!a || !a.done) return n;
+    }
+    return 0;
+  }
+
+  /* --------------------------------------------------------------- clock */
+
+  function remaining(a) {
+    return a.timed ? TIME_LIMIT_MS - a.used : Infinity;
+  }
+
+  function startClock() {
+    stopClock();
+    var a = attempt(openTest);
+    if (!a || !a.timed || a.done) return;
+    clockAt = Date.now();
+    ticks = 0;
+    clock = setInterval(function () {
+      var a2 = attempt(openTest);
+      if (!a2 || a2.done || el.quiz.hidden) return stopClock();
+      var now = Date.now();
+      a2.used += now - clockAt;
+      clockAt = now;
+      if (remaining(a2) <= 0) { stopClock(); return finish(true); }
+      if (++ticks % SAVE_EVERY_TICKS === 0) saveState();
+      updateProgress();
+    }, 1000);
+  }
+
+  function stopClock() {
+    if (!clock) return;
+    clearInterval(clock);
+    clock = null;
+    var a = attempt(openTest);
+    if (a && a.timed && !a.done) {
+      a.used += Date.now() - clockAt;
+      saveState();
+    }
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopClock();
+    else if (!el.quiz.hidden) startClock();
+  });
+  window.addEventListener('pagehide', stopClock);
 
   /* -------------------------------------------------------------- screens */
 
-  var SCREENS = ['loading', 'error', 'home', 'quiz', 'result', 'review', 'summary'];
+  var SCREENS = ['loading', 'error', 'home', 'quiz', 'result', 'review'];
 
   function show(name) {
+    if (name !== 'quiz') stopClock();
     SCREENS.forEach(function (s) { el[s].hidden = (s !== name); });
     el['progress-area'].hidden = (name !== 'quiz');
     el['home-btn'].hidden = (name === 'loading' || name === 'error' || name === 'home');
-    if (name !== 'quiz') stopTicker();
     window.scrollTo(0, 0);
   }
 
@@ -317,154 +291,160 @@
   /* ----------------------------------------------------------------- home */
 
   function renderHome() {
-    mode = null;
-    current = null;
+    stopClock();
+    openTest = 0;
+    if (state.open) { state.open = 0; saveState(); }
 
-    var m = state.mock;
-    var left = testsLeft();
-    var active = m.active;
+    var size = tests[0].ids.length;
+    el['home-title'].textContent = tests.length + ' mock tests';
+    el['home-blurb'].textContent =
+      'Every test is a fixed set of ' + size + ' questions covering all five topics, with a pass ' +
+      'mark of ' + passMark(size) + '. The ' + bank.length + ' questions in the bank are split ' +
+      'between the tests, so no question appears in two of them. Take them in any order, in your ' +
+      'own time — each one keeps its own progress.';
 
-    el['mock-title'].textContent = active
-      ? 'Mock test ' + active.n + ' — in progress'
-      : 'Mock test ' + (m.tests.length + 1);
+    var done = 0, won = 0, total = 0, started = 0;
+    tests.forEach(function (t) {
+      var a = attempt(t.n);
+      if (!a) return;
+      if (a.done) { done++; total += a.score; if (passed(a)) won++; }
+      else if (answered(a)) started++;
+    });
 
-    el['start-mock'].textContent = active ? 'Resume mock test ' + active.n : 'Start mock test';
-    el['abandon-mock'].hidden = !active;
-    el['timed-toggle'].checked = !!state.timed;
-    el['timed-toggle'].disabled = !!active;
-
-    el['pool-line'].textContent =
-      plural(m.pool.length, 'question') + ' never used yet — ' +
-      (left > 0 ? 'enough for ' + plural(left, 'more full test') + '.'
-                : 'not enough for another full test.');
-
-    var short = !active && m.pool.length < TEST_SIZE;
-    el['pool-empty'].hidden = !short;
-    if (short) {
-      el['pool-empty'].textContent = m.pool.length === 0
-        ? 'You have worked through every question in the bank. Reset the mock tests below to go ' +
-          'round again — your finished scores are kept until you do.'
-        : 'Only ' + plural(m.pool.length, 'unused question') + ' left, so the next test would be ' +
-          'short. Reset the mock tests below for a fresh run through the bank.';
+    var bits = [done + ' of ' + tests.length + ' tests completed'];
+    if (done) {
+      bits.push(won + ' passed');
+      bits.push('average ' + (Math.round((total / done) * 10) / 10) + ' out of ' + size);
     }
-    el['start-mock'].disabled = !active && m.pool.length === 0;
+    if (started) bits.push(plural(started, 'test') + ' in progress');
+    el['overall-line'].textContent = bits.join(' · ') + '.';
 
-    renderHistory();
+    var through = pct(done, tests.length);
+    el['overall-fill'].style.width = through + '%';
+    el['overall-fill'].parentNode.setAttribute('aria-valuenow', String(through));
+    el['reset-all'].hidden = !Object.keys(state.tests).length;
 
-    var p = state.practice;
-    var doneP = Object.keys(p.results).length;
-    el['practice-line'].textContent = doneP
-      ? doneP + ' of ' + p.order.length + ' answered, ' +
-        scorePractice() + ' right (' + pct(scorePractice(), doneP) + '%).'
-      : p.order.length + ' questions in the bank.';
-    el['start-practice'].textContent = doneP ? 'Continue practice' : 'Start practice';
-    el['reset-practice'].hidden = !doneP;
-
+    renderList();
     show('home');
   }
 
-  function renderHistory() {
-    var tests = state.mock.tests;
-    el['history-card'].hidden = !tests.length;
-    if (!tests.length) return;
+  function renderList() {
+    el['test-list'].innerHTML = '';
 
-    var passed = tests.filter(function (t) { return t.score >= PASS_MARK; }).length;
-    var totalScore = tests.reduce(function (n, t) { return n + t.score; }, 0);
-    el['history-line'].textContent =
-      plural(tests.length, 'test') + ' completed, ' + passed + ' passed. ' +
-      'Average ' + (Math.round((totalScore / tests.length) * 10) / 10) + ' out of ' + TEST_SIZE + '.';
+    tests.forEach(function (t) {
+      var a = attempt(t.n);
+      var size = t.ids.length;
 
-    el['history-body'].innerHTML = '';
-    tests.slice().reverse().forEach(function (t) {
-      var tr = document.createElement('tr');
+      var li = document.createElement('li');
+      li.className = 'card test-row';
 
-      var tdN = document.createElement('td');
-      tdN.textContent = 'Test ' + t.n;
-      tr.appendChild(tdN);
+      var head = document.createElement('div');
+      head.className = 'test-head';
 
-      var tdS = document.createElement('td');
-      tdS.textContent = t.score + '/' + t.ids.length;
-      tr.appendChild(tdS);
+      var name = document.createElement('span');
+      name.className = 'test-name';
+      name.textContent = 'Mock test ' + t.n;
+      head.appendChild(name);
 
-      var tdR = document.createElement('td');
       var tag = document.createElement('span');
-      var ok = t.score >= PASS_MARK;
-      tag.className = 'tag ' + (ok ? 'ok' : 'no');
-      tag.textContent = ok ? 'Passed' : 'Not passed';
-      tdR.appendChild(tag);
-      tr.appendChild(tdR);
+      if (!a || (!a.done && !answered(a))) {
+        tag.className = 'tag idle';
+        tag.textContent = plural(size, 'question');
+      } else if (!a.done) {
+        tag.className = 'tag part';
+        tag.textContent = answered(a) + ' of ' + size + ' answered';
+      } else {
+        tag.className = 'tag ' + (passed(a) ? 'ok' : 'no');
+        tag.textContent = (passed(a) ? 'Passed' : 'Not passed') + ' · ' + a.score + '/' + size;
+      }
+      head.appendChild(tag);
+      li.appendChild(head);
 
-      var tdB = document.createElement('td');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'link-btn';
-      btn.textContent = 'Review';
-      btn.addEventListener('click', function () { renderResult(t); });
-      tdB.appendChild(btn);
-      tr.appendChild(tdB);
+      if (a && (a.done || answered(a))) {
+        var bar = document.createElement('div');
+        bar.className = 'bar slim';
+        var fill = document.createElement('div');
+        fill.className = 'bar-fill' + (a.done ? (passed(a) ? ' good' : ' bad') : '');
+        fill.style.width = (a.done ? pct(a.score, size) : pct(answered(a), size)) + '%';
+        bar.appendChild(fill);
+        li.appendChild(bar);
+      }
 
-      el['history-body'].appendChild(tr);
+      var actions = document.createElement('div');
+      actions.className = 'actions';
+
+      function button(label, cls, fn) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = cls;
+        b.textContent = label;
+        b.addEventListener('click', fn);
+        actions.appendChild(b);
+      }
+
+      if (!a) {
+        button('Start test', 'primary-btn', function () { begin(t.n); });
+      } else if (!a.done) {
+        button(answered(a) ? 'Resume' : 'Start test', 'primary-btn', function () { begin(t.n); });
+        if (answered(a)) button('Reset', 'ghost-btn', function () { resetTest(t.n); });
+      } else {
+        button('Review', 'primary-btn', function () { renderResult(t.n); });
+        button('Take again', 'ghost-btn', function () { retake(t.n); });
+        button('Reset', 'ghost-btn', function () { resetTest(t.n); });
+      }
+      li.appendChild(actions);
+
+      el['test-list'].appendChild(li);
     });
   }
 
-  /* ------------------------------------------------------------ mock test */
-
-  function startMock() {
-    if (!state.mock.active) {
-      if (!state.mock.pool.length) return;
-      state.mock.active = drawTest();
-      saveState();
-    }
-    mode = 'mock';
-    renderMock();
-  }
-
-  function abandonMock() {
-    var a = state.mock.active;
+  function resetTest(n) {
+    var a = attempt(n);
     if (!a) return;
-    if (!confirm('Abandon mock test ' + a.n + '? Its questions go back in the pool for a later test.')) return;
-    state.mock.pool = shuffle(state.mock.pool.concat(a.ids));
-    state.mock.active = null;
+    var what = a.done ? 'Clear your result for mock test ' + n + '?'
+                      : 'Clear your answers so far in mock test ' + n + '?';
+    if (!confirm(what)) return;
+    delete state.tests[n];
     saveState();
     renderHome();
   }
 
-  function timeLeft() {
-    var a = state.mock.active;
-    if (!a || !a.timed) return Infinity;
-    return a.endsAt - Date.now();
+  function retake(n) {
+    if (!confirm('Take mock test ' + n + ' again? Your previous result for it is replaced.')) return;
+    delete state.tests[n];
+    saveState();
+    begin(n);
   }
 
-  function startTicker() {
-    stopTicker();
-    var a = state.mock.active;
-    if (!a || !a.timed) return;
-    ticker = setInterval(function () {
-      if (mode !== 'mock' || !state.mock.active) return stopTicker();
-      if (timeLeft() <= 0) { stopTicker(); return finishMock(true); }
-      updateProgress();
-    }, 1000);
+  function resetAll() {
+    if (!confirm('Reset every mock test? All your results and answers are cleared.')) return;
+    state.tests = {};
+    saveState();
+    renderHome();
   }
 
-  function stopTicker() {
-    if (ticker) { clearInterval(ticker); ticker = null; }
+  /* ------------------------------------------------------------- the test */
+
+  function begin(n) {
+    openTest = n;
+    var a = attempt(n) || startAttempt(n);
+    if (a.done) return renderResult(n);
+    state.open = n;                 // so closing the tab comes back to this test
+    saveState();
+    renderQuestion();
   }
 
-  function renderMock() {
-    var a = state.mock.active;
+  function renderQuestion() {
+    var a = attempt(openTest);
     if (!a) return renderHome();
-    if (a.timed && timeLeft() <= 0) return finishMock(true);
+    if (remaining(a) <= 0) return finish(true);
 
-    var q = byId[a.ids[a.pos]];
-    awaitingNext = false;
-    current = null;
+    var q = byId[a.qorder[a.pos]];
+    var chosen = a.answers.hasOwnProperty(q.id) ? a.answers[q.id] : null;
 
     el.category.textContent = q.category;
     el.question.textContent = q.question;
-    el.feedback.hidden = true;
     el.options.innerHTML = '';
-
-    var chosen = a.answers.hasOwnProperty(q.id) ? a.answers[q.id] : null;
 
     a.order[q.id].forEach(function (orig, slot) {
       var li = document.createElement('li');
@@ -482,33 +462,29 @@
 
       btn.appendChild(letter);
       btn.appendChild(text);
-      btn.addEventListener('click', function () { chooseMock(orig); });
+      btn.addEventListener('click', function () { choose(orig); });
       li.appendChild(btn);
       el.options.appendChild(li);
     });
 
-    var last = a.pos === a.ids.length - 1;
     el['prev-btn'].hidden = a.pos === 0;
-    el['next-btn'].hidden = false;
-    el['next-btn'].textContent = last ? 'Finish test' : 'Next question';
-    el['quiz-hint'].innerHTML =
-      'Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer, <kbd>Enter</kbd> for the next question. ' +
-      'You can go back and change an answer before you finish.';
+    el['next-btn'].textContent = a.pos === a.qorder.length - 1 ? 'Finish test' : 'Next question';
 
     renderDots();
     updateProgress();
     show('quiz');
-    startTicker();
+    startClock();
   }
 
-  function chooseMock(orig) {
-    var a = state.mock.active;
-    if (!a) return;
-    a.answers[a.ids[a.pos]] = orig;
+  function choose(orig) {
+    var a = attempt(openTest);
+    if (!a || a.done) return;
+    var id = a.qorder[a.pos];
+    a.answers[id] = orig;
     saveState();
 
     var buttons = el.options.querySelectorAll('.option');
-    var slots = a.order[a.ids[a.pos]];
+    var slots = a.order[id];
     for (var i = 0; i < buttons.length; i++) {
       var on = slots[i] === orig;
       buttons[i].classList.toggle('chosen', on);
@@ -518,30 +494,29 @@
     updateProgress();
   }
 
-  function goMock(pos) {
-    var a = state.mock.active;
-    if (!a || pos < 0 || pos >= a.ids.length) return;
+  function goTo(pos) {
+    var a = attempt(openTest);
+    if (!a || pos < 0 || pos >= a.qorder.length) return;
     a.pos = pos;
     saveState();
-    renderMock();
+    renderQuestion();
   }
 
-  function nextMock() {
-    var a = state.mock.active;
+  function next() {
+    var a = attempt(openTest);
     if (!a) return;
-    if (a.pos < a.ids.length - 1) return goMock(a.pos + 1);
+    if (a.pos < a.qorder.length - 1) return goTo(a.pos + 1);
 
-    var blank = a.ids.filter(function (id) { return !a.answers.hasOwnProperty(id); }).length;
+    var blank = a.qorder.length - answered(a);
     if (blank && !confirm(plural(blank, 'question') + ' still unanswered. Finish the test anyway?')) return;
-    finishMock(false);
+    finish(false);
   }
 
   function renderDots() {
-    var a = state.mock.active;
-    el['dots-wrap'].hidden = false;
+    var a = attempt(openTest);
     el.dots.innerHTML = '';
 
-    a.ids.forEach(function (id, i) {
+    a.qorder.forEach(function (id, i) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'dot' +
@@ -551,86 +526,121 @@
       b.setAttribute('aria-label', 'Question ' + (i + 1) +
         (a.answers.hasOwnProperty(id) ? ', answered' : ', not answered'));
       if (i === a.pos) b.setAttribute('aria-current', 'true');
-      b.addEventListener('click', function () { goMock(i); });
+      b.addEventListener('click', function () { goTo(i); });
       el.dots.appendChild(b);
     });
   }
 
-  function finishMock(timedOut) {
-    stopTicker();
-    var a = state.mock.active;
+  function finish(timedOut) {
+    stopClock();
+    var a = attempt(openTest);
     if (!a) return renderHome();
 
-    var score = 0;
-    a.ids.forEach(function (id) {
-      if (a.answers[id] === byId[id].answerIndex) score++;
-    });
-
-    var test = {
-      n: a.n,
-      ids: a.ids,
-      order: a.order,
-      answers: a.answers,
-      score: score,
-      timed: !!a.timed,
-      timedOut: !!timedOut,
-      startedAt: a.startedAt,
-      finishedAt: Date.now()
-    };
-
-    state.mock.tests.push(test);
-    state.mock.active = null;
+    a.score = scoreOf(a);
+    a.done = true;
+    a.timedOut = !!timedOut;
+    a.finishedAt = Date.now();
+    state.open = 0;
     saveState();
-    renderResult(test);
+    renderResult(openTest);
   }
 
-  function renderResult(test) {
-    mode = null;
-    var total = test.ids.length;
-    var ok = test.score >= PASS_MARK;
+  function updateProgress() {
+    var a = attempt(openTest);
+    if (!a) return;
+
+    el['progress-text'].textContent =
+      'Question ' + (a.pos + 1) + ' of ' + a.qorder.length + ' · test ' + openTest;
+
+    if (a.timed) {
+      var left = remaining(a);
+      el['score-text'].textContent = stamp(left) + ' left';
+      el['score-text'].className = left <= 5 * 60 * 1000 ? 'low-time' : '';
+    } else {
+      el['score-text'].textContent = plural(answered(a), 'answer') + ' given';
+      el['score-text'].className = '';
+    }
+
+    var through = pct(answered(a), a.qorder.length);
+    el['bar-fill'].style.width = through + '%';
+    el['bar-fill'].parentNode.setAttribute('aria-valuenow', String(through));
+  }
+
+  /* -------------------------------------------------------------- results */
+
+  function renderResult(n) {
+    stopClock();
+    openTest = n;
+    var a = attempt(n);
+    if (!a || !a.done) return renderHome();
+
+    var size = a.qorder.length;
+    var mark = passMark(size);
+    var ok = a.score >= mark;
 
     el['result-badge'].textContent = ok ? 'Passed' : 'Not passed';
     el['result-badge'].className = 'badge ' + (ok ? 'badge-ok' : 'badge-no');
-    el['result-title'].textContent = 'Mock test ' + test.n;
-    el['result-score'].textContent = test.score + ' / ' + total + '  (' + pct(test.score, total) + '%)';
+    el['result-title'].textContent = 'Mock test ' + n;
+    el['result-score'].textContent = a.score + ' / ' + size + '  (' + pct(a.score, size) + '%)';
 
-    var mins = Math.max(1, Math.round((test.finishedAt - test.startedAt) / 60000));
-    var bits = [];
-    bits.push(ok
-      ? 'The pass mark is ' + PASS_MARK + ' out of ' + TEST_SIZE + ', so this one is a pass.'
-      : 'The pass mark is ' + PASS_MARK + ' out of ' + TEST_SIZE + ' — ' +
-        plural(PASS_MARK - test.score, 'more') + ' needed.');
-    if (test.timedOut) bits.push('Time ran out before you finished.');
-    else if (test.timed) bits.push('Finished in about ' + plural(mins, 'minute') + ' of the 45 allowed.');
-    var blank = test.ids.filter(function (id) { return !test.answers.hasOwnProperty(id); }).length;
+    var bits = [ok
+      ? 'The pass mark is ' + mark + ' out of ' + size + ', so this one is a pass.'
+      : 'The pass mark is ' + mark + ' out of ' + size + ' — ' +
+        plural(mark - a.score, 'more') + ' needed.'];
+    if (a.timedOut) bits.push('Time ran out before you finished.');
+    else if (a.timed) bits.push('You used ' + stamp(a.used) + ' of the 45 minutes.');
+    var blank = size - answered(a);
     if (blank) bits.push(plural(blank, 'question') + ' left unanswered.');
     el['result-line'].textContent = bits.join(' ');
 
-    fillBreakdown(el['result-breakdown'], test.ids, function (id) {
-      return test.answers[id] === byId[id].answerIndex;
+    var groups = {};
+    a.qorder.forEach(function (id) {
+      var q = byId[id];
+      if (!q) return;
+      var g = groups[q.category] || (groups[q.category] = { n: 0, ok: 0 });
+      g.n++;
+      if (a.answers[id] === q.answerIndex) g.ok++;
     });
 
-    el['result-review'].onclick = function () { renderReview(test); };
-    el['result-next'].hidden = state.mock.pool.length === 0;
-    el['result-next'].textContent = state.mock.active
-      ? 'Resume mock test ' + state.mock.active.n
-      : 'Start mock test ' + (state.mock.tests.length + 1);
+    el['result-breakdown'].innerHTML = '';
+    Object.keys(groups).sort().forEach(function (name) {
+      var g = groups[name];
+      var tr = document.createElement('tr');
+      [name, g.ok + '/' + g.n, pct(g.ok, g.n) + '%'].forEach(function (v) {
+        var td = document.createElement('td');
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      el['result-breakdown'].appendChild(tr);
+    });
+
+    var upNext = nextUnfinished(indexOfTest(n) + 1);
+    el['result-next'].hidden = !upNext || upNext === n;
+    el['result-next'].textContent = 'Next test' + (upNext ? ' (' + upNext + ')' : '');
+    el['result-next'].onclick = function () { begin(upNext); };
 
     show('result');
   }
 
-  function renderReview(test) {
-    mode = null;
-    el['review-title'].textContent = 'Mock test ' + test.n + ' — your answers';
-    el['review-line'].textContent =
-      test.score + ' of ' + test.ids.length + ' correct. These questions will not come back in a ' +
-      'later mock test, so read the explanations now.';
+  function indexOfTest(n) {
+    for (var i = 0; i < tests.length; i++) if (tests[i].n === n) return i;
+    return 0;
+  }
+
+  function renderReview(n) {
+    var a = attempt(n);
+    if (!a || !a.done) return renderHome();
+    openTest = n;
+
+    el['review-title'].textContent = 'Mock test ' + n + ' — your answers';
+    el['review-line'].textContent = a.score + ' of ' + a.qorder.length + ' correct. ' +
+      'These questions belong to this test only, so they will not come up in another one.';
 
     el['review-list'].innerHTML = '';
-    test.ids.forEach(function (id, i) {
+    a.qorder.forEach(function (id, i) {
       var q = byId[id];
       if (!q) return;
-      var chosen = test.answers.hasOwnProperty(id) ? test.answers[id] : null;
+      var chosen = a.answers.hasOwnProperty(id) ? a.answers[id] : null;
       var right = chosen === q.answerIndex;
 
       var li = document.createElement('li');
@@ -663,7 +673,7 @@
 
       var ul = document.createElement('ul');
       ul.className = 'options';
-      (test.order[id] || [0, 1, 2, 3]).forEach(function (orig, slot) {
+      (a.order[id] || [0, 1, 2, 3]).forEach(function (orig, slot) {
         var row = document.createElement('li');
         var div = document.createElement('div');
         div.className = 'option static';
@@ -699,242 +709,39 @@
       el['review-list'].appendChild(li);
     });
 
-    el['review-back'].onclick = function () { renderResult(test); };
-    el['review-back-2'].onclick = function () { renderResult(test); };
     show('review');
-  }
-
-  function fillBreakdown(tbody, ids, isRight) {
-    var groups = {};
-    ids.forEach(function (id) {
-      var q = byId[id];
-      if (!q) return;
-      var g = groups[q.category] || (groups[q.category] = { n: 0, ok: 0 });
-      g.n++;
-      if (isRight(id)) g.ok++;
-    });
-
-    tbody.innerHTML = '';
-    Object.keys(groups).sort().forEach(function (name) {
-      var g = groups[name];
-      var tr = document.createElement('tr');
-      [name, g.ok + '/' + g.n, pct(g.ok, g.n) + '%'].forEach(function (v) {
-        var td = document.createElement('td');
-        td.textContent = v;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-  }
-
-  /* ------------------------------------------------------------- practice */
-
-  function scorePractice() {
-    var r = state.practice.results;
-    return Object.keys(r).reduce(function (n, id) { return n + (r[id] ? 1 : 0); }, 0);
-  }
-
-  function startPractice() {
-    mode = 'practice';
-    renderPractice();
-  }
-
-  function renderPractice() {
-    var p = state.practice;
-    if (p.pos >= p.order.length) return renderSummary();
-
-    var q = byId[p.order[p.pos]];
-    if (!q) {                       // defensive: id vanished from the bank
-      p.pos++;
-      saveState();
-      return renderPractice();
-    }
-
-    var display = shuffle(q.options.map(function (text, i) {
-      return { text: text, isCorrect: i === q.answerIndex };
-    }));
-    current = { q: q, display: display };
-    awaitingNext = false;
-
-    el.category.textContent = q.category;
-    el.question.textContent = q.question;
-    el.options.innerHTML = '';
-
-    display.forEach(function (opt, i) {
-      var li = document.createElement('li');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'option';
-
-      var letter = document.createElement('span');
-      letter.className = 'letter';
-      letter.textContent = LETTERS[i];
-
-      var text = document.createElement('span');
-      text.textContent = opt.text;
-
-      btn.appendChild(letter);
-      btn.appendChild(text);
-      btn.addEventListener('click', function () { answerPractice(i); });
-      li.appendChild(btn);
-      el.options.appendChild(li);
-    });
-
-    el.feedback.hidden = true;
-    el['prev-btn'].hidden = true;
-    el['next-btn'].hidden = true;
-    el['dots-wrap'].hidden = true;
-    el['quiz-hint'].innerHTML =
-      'Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer, <kbd>Enter</kbd> to continue.';
-
-    updateProgress();
-    show('quiz');
-  }
-
-  function answerPractice(chosenIndex) {
-    if (awaitingNext || !current) return;
-    awaitingNext = true;
-
-    var p = state.practice;
-    var correct = current.display[chosenIndex].isCorrect;
-
-    // Recorded and advanced right away, so a reload never repeats this question.
-    p.results[current.q.id] = correct;
-    p.pos++;
-    saveState();
-
-    var buttons = el.options.querySelectorAll('.option');
-    for (var i = 0; i < buttons.length; i++) {
-      buttons[i].disabled = true;
-      if (current.display[i].isCorrect) {
-        buttons[i].classList.add('correct');
-      } else if (i === chosenIndex) {
-        buttons[i].classList.add('wrong');
-      } else {
-        buttons[i].classList.add('muted-out');
-      }
-    }
-
-    el.verdict.textContent = correct ? 'Correct' : 'Not quite';
-    el.verdict.className = 'verdict ' + (correct ? 'ok' : 'no');
-    el.explanation.textContent = current.q.explanation;
-    el.feedback.hidden = false;
-
-    var last = p.pos >= p.order.length;
-    el['next-btn'].textContent = last ? 'See your results' : 'Next question';
-    el['next-btn'].hidden = false;
-    el['next-btn'].focus();
-
-    updateProgress();
-  }
-
-  function renderSummary() {
-    mode = null;
-    var p = state.practice;
-    var answered = Object.keys(p.results).length;
-    var got = scorePractice();
-
-    el['summary-score'].textContent = got + ' / ' + answered + '  (' + pct(got, answered) + '%)';
-    el['summary-line'].textContent = pct(got, answered) >= 75
-      ? 'That is comfortably above the 75% pass mark used by the real test.'
-      : 'The real test asks for 75% to pass — worth another run through the bank.';
-
-    fillBreakdown(el['breakdown-body'], Object.keys(p.results), function (id) {
-      return !!p.results[id];
-    });
-    show('summary');
-  }
-
-  /* ------------------------------------------------------------- progress */
-
-  function updateProgress() {
-    if (mode === 'mock') {
-      var a = state.mock.active;
-      if (!a) return;
-      var answered = Object.keys(a.answers).length;
-      el['progress-text'].textContent = 'Question ' + (a.pos + 1) + ' of ' + a.ids.length +
-        ' · test ' + a.n;
-      if (a.timed) {
-        var left = timeLeft();
-        el['score-text'].textContent = clock(left) + ' left';
-        el['score-text'].className = left <= 5 * 60 * 1000 ? 'low-time' : '';
-      } else {
-        el['score-text'].textContent = plural(answered, 'answer') + ' given';
-        el['score-text'].className = '';
-      }
-      setBar(pct(answered, a.ids.length));
-      return;
-    }
-
-    var p = state.practice;
-    var total = p.order.length;
-    var done = Object.keys(p.results).length;
-    var right = scorePractice();
-    el['progress-text'].textContent = p.pos >= total
-      ? 'All ' + total + ' questions answered'
-      : 'Question ' + Math.min(p.pos + 1, total) + ' of ' + total;
-    el['score-text'].textContent = 'Score ' + right + '/' + done + ' (' + pct(right, done) + '%)';
-    el['score-text'].className = '';
-    setBar(pct(p.pos, total));
-  }
-
-  function setBar(value) {
-    el['bar-fill'].style.width = value + '%';
-    el['bar-fill'].parentNode.setAttribute('aria-valuenow', String(value));
   }
 
   /* --------------------------------------------------------------- wiring */
 
   el['home-btn'].addEventListener('click', renderHome);
   el['retry-btn'].addEventListener('click', start);
+  el['reset-all'].addEventListener('click', resetAll);
 
-  el['start-mock'].addEventListener('click', startMock);
-  el['abandon-mock'].addEventListener('click', abandonMock);
   el['timed-toggle'].addEventListener('change', function () {
     state.timed = el['timed-toggle'].checked;
     saveState();
   });
-  el['reset-mocks'].addEventListener('click', function () {
-    if (!confirm('Reset the mock tests? Your finished test scores are cleared and every question ' +
-                 'becomes available again.')) return;
-    state.mock = freshMock();
-    saveState();
-    renderHome();
-  });
 
-  el['start-practice'].addEventListener('click', startPractice);
-  el['reset-practice'].addEventListener('click', function () {
-    if (!confirm('Reset practice? Your practice score is cleared. Mock tests are not affected.')) return;
-    state.practice = freshPractice();
-    saveState();
-    renderHome();
-  });
-
-  el['next-btn'].addEventListener('click', function () {
-    if (mode === 'mock') return nextMock();
-    if (awaitingNext) renderPractice();
-  });
+  el['next-btn'].addEventListener('click', next);
   el['prev-btn'].addEventListener('click', function () {
-    if (mode === 'mock') goMock(state.mock.active.pos - 1);
+    var a = attempt(openTest);
+    if (a) goTo(a.pos - 1);
   });
 
-  el['result-next'].addEventListener('click', startMock);
+  el['result-review'].addEventListener('click', function () { renderReview(openTest); });
+  el['result-retake'].addEventListener('click', function () { retake(openTest); });
   el['result-home'].addEventListener('click', renderHome);
-  el['summary-restart'].addEventListener('click', function () {
-    state.practice = freshPractice();
-    saveState();
-    startPractice();
-  });
-  el['summary-home'].addEventListener('click', renderHome);
+  el['review-back'].addEventListener('click', function () { renderResult(openTest); });
+  el['review-back-2'].addEventListener('click', function () { renderResult(openTest); });
 
   document.addEventListener('keydown', function (e) {
     if (el.quiz.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
 
-    if (e.key === 'Enter' || (e.key === ' ' && mode === 'practice' && awaitingNext)) {
+    if (e.key === 'Enter') {
       if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
-      if (mode === 'mock') { e.preventDefault(); return nextMock(); }
-      if (awaitingNext) { e.preventDefault(); return renderPractice(); }
-      return;
+      e.preventDefault();
+      return next();
     }
 
     var pick = -1;
@@ -943,12 +750,8 @@
     if (pick < 0 || pick > 3) return;
 
     e.preventDefault();
-    if (mode === 'mock') {
-      var a = state.mock.active;
-      chooseMock(a.order[a.ids[a.pos]][pick]);
-    } else if (!awaitingNext) {
-      answerPractice(pick);
-    }
+    var a = attempt(openTest);
+    if (a) choose(a.order[a.qorder[a.pos]][pick]);
   });
 
   /* --------------------------------------------------------------- start */
@@ -965,18 +768,15 @@
         bank = rowsToBank(parseCSV(text));
         byId = {};
         bank.forEach(function (q) { byId[q.id] = q; });
+        groupTests();
 
         state = adoptState(loadState());
         saveState();
+        el['timed-toggle'].checked = !!state.timed;
 
-        // Drop straight back into a test that is still running — on a timed
-        // test the clock has been ticking while the tab was closed.
-        if (state.mock.active) {
-          mode = 'mock';
-          renderMock();
-        } else {
-          renderHome();
-        }
+        // Come back into a test that was left running rather than the list.
+        if (state.open) begin(state.open);
+        else renderHome();
       })
       .catch(function (err) {
         showError(err && err.message ? err.message : String(err));

@@ -195,20 +195,6 @@ h1 { font-size: 1.15rem; margin: 0; line-height: 1.2; }
 
 .option.muted-out { opacity: .55; }
 
-/* ---------- Feedback ---------- */
-
-.feedback {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-
-.verdict { margin: 0 0 8px; font-weight: 700; }
-.verdict.ok { color: var(--good); }
-.verdict.no { color: var(--bad); }
-
-.explanation { margin: 0; color: var(--text); }
-
 /* ---------- Buttons ---------- */
 
 .primary-btn, .ghost-btn {
@@ -394,12 +380,6 @@ kbd {
 
 .link-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-#history-card .breakdown td:last-child,
-#history-card .breakdown th:last-child { text-align: right; }
-#history-card .breakdown td:nth-child(3),
-#history-card .breakdown th:nth-child(3) { text-align: left; }
-#history-card .ghost-btn { margin-top: 16px; }
-
 /* ---------- Quiz navigation ---------- */
 
 .nav-row { margin-top: 18px; }
@@ -483,3 +463,30 @@ kbd {
   .dot { width: 30px; height: 30px; }
   .your-pick { display: none; }
 }
+
+/* ---------- Test list ---------- */
+
+.test-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.test-row { padding: 14px 16px; display: grid; gap: 10px; }
+
+.test-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.test-name { font-weight: 700; font-size: .98rem; }
+
+.tag.idle { background: var(--line); color: var(--muted); }
+.tag.part { background: var(--accent-soft); color: var(--accent); }
+
+.bar.slim { height: 5px; margin: 0; }
+.bar-fill.good { background: var(--good); }
+.bar-fill.bad { background: var(--bad); }
+
+.test-row .actions .primary-btn,
+.test-row .actions .ghost-btn { padding: 7px 14px; font-size: .88rem; }
+
+#overall-line { margin-bottom: 8px; }
